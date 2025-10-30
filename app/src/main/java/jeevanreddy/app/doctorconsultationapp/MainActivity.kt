@@ -1,5 +1,6 @@
 package jeevanreddy.app.doctorconsultationapp
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -50,8 +51,8 @@ class MainActivity : ComponentActivity() {
             }
 
             2 -> {
-//                startActivity(Intent(this, SignInActivity::class.java))
-//                finish()
+                startActivity(Intent(this, LoginActivity::class.java))
+                finish()
             }
 
             3 -> {
@@ -70,7 +71,7 @@ fun MainScreen(onLoginClick: (value: Int) -> Unit) {
 
     LaunchedEffect(Unit) {
         delay(3000) // 3 seconds delay
-//        showSplash = false
+        showSplash = false
     }
 
     if (showSplash) {
