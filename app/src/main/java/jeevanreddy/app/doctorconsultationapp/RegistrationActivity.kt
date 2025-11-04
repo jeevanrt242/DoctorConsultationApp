@@ -3,7 +3,6 @@ package jeevanreddy.app.doctorconsultationapp
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -22,14 +21,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -55,20 +50,24 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 
 
-class LoginActivity : ComponentActivity() {
+class DoctorRegistrationActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            AccessActivityScreen()
+            UserRegistrationActivityScreen()
         }
     }
 }
 
 
+
 @Composable
-fun AccessActivityScreen() {
+fun UserRegistrationActivityScreen() {
+    var patientFN by remember { mutableStateOf("") }
+    var patientAge by remember { mutableStateOf("") }
     var patientEmail by remember { mutableStateOf("") }
-    var patientPassword by remember { mutableStateOf("") }
+    var patientPass by remember { mutableStateOf("") }
+    var confirmPass by remember { mutableStateOf("") }
 
     val context = LocalContext.current as Activity
 
@@ -91,7 +90,6 @@ fun AccessActivityScreen() {
         Spacer(modifier = Modifier.height(32.dp))
 
 
-
         Card(
             modifier = Modifier
                 .fillMaxSize()
@@ -108,7 +106,7 @@ fun AccessActivityScreen() {
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "Login to your account",
+                text = "Create New Account",
                 color = colorResource(id = R.color.SlateBlue),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
@@ -133,6 +131,50 @@ fun AccessActivityScreen() {
             ) {
                 Spacer(modifier = Modifier.height(32.dp))
 
+
+                Text(
+                    modifier = Modifier.padding(start = 12.dp),
+                    text = "Enter FullName"
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    value = patientFN,
+                    onValueChange = { patientFN = it },
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = Color.White,
+                        focusedContainerColor = Color.White,
+                    )
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Text(
+                    modifier = Modifier.padding(start = 12.dp),
+                    text = "Enter Age"
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                OutlinedTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp),
+                    value = patientAge,
+                    onValueChange = { patientAge = it },
+                    colors = TextFieldDefaults.colors(
+                        unfocusedContainerColor = Color.White,
+                        focusedContainerColor = Color.White,
+                    )
+                )
+
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+
                 Text(
                     modifier = Modifier.padding(start = 12.dp),
                     text = "Enter Email"
@@ -152,7 +194,7 @@ fun AccessActivityScreen() {
                     )
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     modifier = Modifier.padding(start = 12.dp),
@@ -165,8 +207,8 @@ fun AccessActivityScreen() {
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp),
-                    value = patientPassword,
-                    onValueChange = { patientPassword = it },
+                    value = patientPass,
+                    onValueChange = { patientPass = it },
                     colors = TextFieldDefaults.colors(
                         unfocusedContainerColor = Color.White,
                         focusedContainerColor = Color.White,
@@ -176,15 +218,7 @@ fun AccessActivityScreen() {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = {
-//                        context.startActivity(
-//                        Intent(
-//                            context,
-//                            PatientDashboardActivity::class.java
-//                        )
-//                    )
-//                        context.finish()
-                    },
+                    onClick = { /* Handle login */ },
                     modifier = Modifier
                         .width(200.dp)
                         .align(Alignment.CenterHorizontally),
@@ -197,7 +231,7 @@ fun AccessActivityScreen() {
                     )
                 ) {
                     Text(
-                        text = "Login",
+                        text = "Register",
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
                     )
                 }
@@ -207,20 +241,15 @@ fun AccessActivityScreen() {
                 Row(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 ) {
-                    Text(text = "I'm new to this app !", fontSize = 14.sp)
+                    Text(text = "I'm an old user !", fontSize = 14.sp)
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Register",
+                        text = "Login",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = colorResource(id = R.color.white), // Blue text color for "Sign Up"
                         modifier = Modifier.clickable {
-                            context.startActivity(
-                                Intent(
-                                    context,
-                                    DoctorRegistrationActivity::class.java
-                                )
-                            )
+                            context.startActivity(Intent(context, LoginActivity::class.java))
                             context.finish()
                         }
                     )
@@ -236,6 +265,6 @@ fun AccessActivityScreen() {
 
 @Preview(showBackground = true)
 @Composable
-fun AccessActivityPreview() {
-    AccessActivityScreen()
+fun UserRegistrationActivityPreview() {
+    UserRegistrationActivityScreen()
 }

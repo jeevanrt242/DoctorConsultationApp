@@ -1,5 +1,6 @@
 package jeevanreddy.app.doctorconsultationapp
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,7 +12,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,63 +38,47 @@ import kotlinx.coroutines.delay
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContent {
             DoctorConsultationAppTheme {
-                MainScreen(::checkLoginStatusAndGo)
-            }
-        }
-    }
-
-    private fun checkLoginStatusAndGo(value: Int) {
-
-        when (value) {
-            1 -> {
-                //TODO Add Home Screen
-            }
-
-            2 -> {
-                startActivity(Intent(this, LoginActivity::class.java))
-                finish()
-            }
-
-            3 -> {
-//                startActivity(Intent(this, SignUpActivity::class.java))
-//                finish()
+                EntryScreenMA()
             }
         }
     }
 }
 
-@Composable
-fun MainScreen(onLoginClick: (value: Int) -> Unit) {
-    var showSplash by remember { mutableStateOf(true) }
 
-    val context = LocalContext.current
+@Composable
+fun EntryScreenMA() {
+    val context = LocalContext.current as Activity
 
     LaunchedEffect(Unit) {
-        delay(3000) // 3 seconds delay
-        showSplash = false
+        delay(3000)
+
+        gotoLogin(context)
+
+//        val patientLS = if (PatientDetails.getPatientLoginStatus(context)) 2 else 1
+//
+//        if (patientLS == 1) {
+//            Navigation.goAccessActivity(context, true)
+//        }
     }
 
-    if (showSplash) {
-        SplashScreen()
-    } else {
-        if (AccountData.getLoginStatus(context)) {
-            onLoginClick.invoke(1)
-        } else {
-            onLoginClick.invoke(2)
-        }
-    }
+    EntryScreen()
+}
+
+fun gotoLogin(context: Activity) {
+    context.startActivity(Intent(context, LoginActivity::class.java))
+    context.finish()
 }
 
 @Composable
-fun SplashScreen() {
-    val context = LocalContext.current
+fun EntryScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = colorResource(id = R.color.p1)),
+            .background(color = colorResource(id = R.color.SlateBlue)),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -102,33 +89,34 @@ fun SplashScreen() {
 
 
             Image(
-                painter = painterResource(id = R.drawable.doctor_consultation_icon),
-                contentDescription = "Doctor Consultation App",
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                painter = painterResource(id = R.drawable.ic_doctor),
+                contentDescription = "Doctor Consultation App by Jeevan Reddy",
             )
 
             Spacer(modifier = Modifier.weight(1f))
 
             Text(
-                text = "Doctor Consultation App",
-                color = colorResource(id = R.color.p2),
-                fontSize = 36.sp,
+                text = "Welcome To",
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(bottom = 6.dp)
-                    .align(Alignment.CenterHorizontally)
+                color = colorResource(id = R.color.white), // Green color similar to the design
+                fontSize = 26.sp,
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center
             )
 
+            Spacer(modifier = Modifier.height(32.dp))
+
             Text(
-                text = "By Jeevan Reddy",
-                color = colorResource(id = R.color.p2),
-                fontSize = 36.sp,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(bottom = 18.dp)
-                    .align(Alignment.CenterHorizontally)
+                text = "Doctor Consultation App\nby Jeevan Reddy",
+                color = colorResource(id = R.color.white), // Green color similar to the design
+                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.Bold),
+                modifier = Modifier.align(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center
             )
+
+            Spacer(modifier = Modifier.weight(1f))
 
 
         }
@@ -139,6 +127,6 @@ fun SplashScreen() {
 
 @Preview(showBackground = true)
 @Composable
-fun MainActivityPreview() {
-    SplashScreen()
+fun EntryScreenPreview() {
+    EntryScreen()
 }
