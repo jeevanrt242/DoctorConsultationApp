@@ -1,8 +1,10 @@
 package jeevanreddy.app.doctorconsultationapp
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -27,6 +29,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -48,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.database.FirebaseDatabase
 
 
 class DoctorRegistrationActivity : ComponentActivity() {
@@ -58,7 +62,6 @@ class DoctorRegistrationActivity : ComponentActivity() {
         }
     }
 }
-
 
 
 @Composable
@@ -218,7 +221,43 @@ fun UserRegistrationActivityScreen() {
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Button(
-                    onClick = { /* Handle login */ },
+                    onClick = {
+                        when {
+                            patientFN.isEmpty() -> {
+                                Toast.makeText(context, " Please Enter Name", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+
+                            patientAge.isEmpty() -> {
+                                Toast.makeText(context, " Please Enter Age", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+
+                            patientEmail.isEmpty() -> {
+                                Toast.makeText(context, " Please Enter Email", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+
+                            patientPass.isEmpty() -> {
+                                Toast.makeText(
+                                    context,
+                                    " Please Enter Password",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
+                            else -> {
+                                val facultyDetails = PatientDetails(
+                                    patientFN,
+                                    patientEmail,
+                                    patientAge,
+                                    patientPass
+                                )
+                                registerPatient(facultyDetails, context);
+                            }
+
+                        }
+                    },
                     modifier = Modifier
                         .width(200.dp)
                         .align(Alignment.CenterHorizontally),
@@ -268,3 +307,39 @@ fun UserRegistrationActivityScreen() {
 fun UserRegistrationActivityPreview() {
     UserRegistrationActivityScreen()
 }
+
+fun registerPatient(patientDetails: PatientDetails, context: Context) {
+
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("PatientDetails")
+
+    databaseReference.child(patientDetails.emailid.replace(".", ","))
+        .setValue(patientDetails)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                Toast.makeText(context, "You Registered Successfully", Toast.LENGTH_SHORT)
+                    .show()
+
+            } else {
+                Toast.makeText(
+                    context,
+                    "Registration Failed",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+        .addOnFailureListener { _ ->
+            Toast.makeText(
+                context,
+                "Something went wrong",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+}
+
+data class PatientDetails(
+    var name: String = "",
+    var emailid: String = "",
+    var age: String = "",
+    var password: String = ""
+)

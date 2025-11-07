@@ -1,6 +1,7 @@
 package jeevanreddy.app.doctorconsultationapp
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -53,6 +54,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.google.firebase.database.FirebaseDatabase
+import kotlin.jvm.java
 
 
 class LoginActivity : ComponentActivity() {
@@ -177,13 +180,28 @@ fun AccessActivityScreen() {
 
                 Button(
                     onClick = {
-//                        context.startActivity(
-//                        Intent(
-//                            context,
-//                            PatientDashboardActivity::class.java
-//                        )
-//                    )
-//                        context.finish()
+                        when {
+                            patientEmail.isEmpty() -> {
+                                Toast.makeText(context, " Please Enter Mail", Toast.LENGTH_SHORT).show()
+                            }
+
+                            patientPassword.isEmpty() -> {
+                                Toast.makeText(context, " Please Enter Password", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
+
+                            else -> {
+                                val facultyDetails = PatientDetails(
+                                    "",
+                                    patientEmail,
+                                    "",
+                                    patientPassword
+                                )
+
+                                loginUser(facultyDetails,context)
+                            }
+
+                        }
                     },
                     modifier = Modifier
                         .width(200.dp)
@@ -238,4 +256,35 @@ fun AccessActivityScreen() {
 @Composable
 fun AccessActivityPreview() {
     AccessActivityScreen()
+}
+
+fun loginUser(facultyDetails: PatientDetails, context: Context) {
+
+    val firebaseDatabase = FirebaseDatabase.getInstance()
+    val databaseReference = firebaseDatabase.getReference("PatientDetails").child(facultyDetails.emailid.replace(".", ","))
+
+    databaseReference.get().addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+            val donorData = task.result?.getValue(PatientDetails::class.java)
+            if (donorData != null) {
+                if (donorData.password == facultyDetails.password) {
+
+                    Toast.makeText(context, "Login Sucessfully", Toast.LENGTH_SHORT).show()
+//                    context.startActivity(Intent(context, FacultyHomeActivity::class.java))
+
+                } else {
+                    Toast.makeText(context, "Seems Incorrect Credentials", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                Toast.makeText(context, "Your account not found", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(
+                context,
+                "Something went wrong",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+    }
 }
