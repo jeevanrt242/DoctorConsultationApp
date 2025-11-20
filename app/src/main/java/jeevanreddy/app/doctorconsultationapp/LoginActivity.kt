@@ -270,7 +270,8 @@ fun loginUser(facultyDetails: PatientDetails, context: Context) {
                 if (donorData.password == facultyDetails.password) {
 
                     Toast.makeText(context, "Login Sucessfully", Toast.LENGTH_SHORT).show()
-//                    context.startActivity(Intent(context, FacultyHomeActivity::class.java))
+                    context.startActivity(Intent(context, HomeActivity::class.java))
+                    (context as Activity).finish()
 
                 } else {
                     Toast.makeText(context, "Seems Incorrect Credentials", Toast.LENGTH_SHORT).show()

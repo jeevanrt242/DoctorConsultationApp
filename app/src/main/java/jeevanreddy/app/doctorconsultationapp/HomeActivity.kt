@@ -1,5 +1,7 @@
 package jeevanreddy.app.doctorconsultationapp
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,13 +44,16 @@ class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
+            HomeScreen()
         }
     }
 }
 
 @Composable
 fun HomeScreen() {
+
+    val context = LocalContext.current as Activity
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -178,6 +184,15 @@ fun HomeScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .weight(1f)
+                    .clickable {
+                        context.startActivity(
+                            Intent(
+                                context,
+                                SearchDoctorsActivity::class.java
+                            )
+                        )
+                        context.finish()
+                    }
                     .background(
                         color = Color(0xFFEFEFEF),   // your background color
                         shape = RoundedCornerShape(12.dp) // optional rounded corners
@@ -213,6 +228,7 @@ fun HomeScreen() {
                         shape = RoundedCornerShape(12.dp) // optional rounded corners
                     )
                     .padding(16.dp) // inner padding so content doesn't touch edges
+
             )
             {
 
