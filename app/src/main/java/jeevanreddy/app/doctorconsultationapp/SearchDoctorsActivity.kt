@@ -90,7 +90,7 @@ fun CardOfDoctorDetails()
                 modifier = Modifier
                     .size(34.dp)
                     .clickable {
-//                        val intent = Intent(context, TravellerDetailsActivity::class.java)
+//                        val intent = Intent(context, ::class.java)
 //                        context.startActivity(intent)
                     }
 
