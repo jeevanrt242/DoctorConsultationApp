@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.database.FirebaseDatabase
+import jeevanreddy.app.doctorconsultationapp.doctor.DoctorHomeActivity
 import kotlin.jvm.java
 
 
@@ -258,20 +259,36 @@ fun AccessActivityPreview() {
     AccessActivityScreen()
 }
 
-fun loginUser(facultyDetails: PatientDetails, context: Context) {
+fun loginUser(patientDetails: PatientDetails, context: Context) {
 
     val firebaseDatabase = FirebaseDatabase.getInstance()
-    val databaseReference = firebaseDatabase.getReference("PatientDetails").child(facultyDetails.emailid.replace(".", ","))
+    val databaseReference = firebaseDatabase.getReference("PatientDetails").child(patientDetails.emailid.replace(".", ","))
 
     databaseReference.get().addOnCompleteListener { task ->
         if (task.isSuccessful) {
-            val donorData = task.result?.getValue(PatientDetails::class.java)
-            if (donorData != null) {
-                if (donorData.password == facultyDetails.password) {
+            val userData = task.result?.getValue(PatientDetails::class.java)
+            if (userData != null) {
+                if (userData.password == patientDetails.password) {
 
-                    Toast.makeText(context, "Login Sucessfully", Toast.LENGTH_SHORT).show()
-                    context.startActivity(Intent(context, HomeActivity::class.java))
-                    (context as Activity).finish()
+                    UserPrefs.markLoginStatus(context = context, true)
+                    UserPrefs.saveEmail(context, email =patientDetails.emailid )
+                    UserPrefs.saveName(context, patientDetails.name)
+                    UserPrefs.saveRole(context, userData.role)
+
+                    Toast.makeText(context, "Login Successfully", Toast.LENGTH_SHORT).show()
+
+                    if(userData.role=="doctor")
+                    {
+                        UserPrefs.saveID(context, userData.id)
+                        context.startActivity(Intent(context, DoctorHomeActivity::class.java))
+                        (context as Activity).finish()
+
+                    }else{
+                        context.startActivity(Intent(context, HomeActivity::class.java))
+                        (context as Activity).finish()
+                    }
+
+
 
                 } else {
                     Toast.makeText(context, "Seems Incorrect Credentials", Toast.LENGTH_SHORT).show()

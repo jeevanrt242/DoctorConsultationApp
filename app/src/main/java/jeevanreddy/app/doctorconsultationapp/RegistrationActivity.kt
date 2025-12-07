@@ -251,7 +251,8 @@ fun UserRegistrationActivityScreen() {
                                     patientFN,
                                     patientEmail,
                                     patientAge,
-                                    patientPass
+                                    patientPass,
+                                    role = "patient"
                                 )
                                 registerPatient(facultyDetails, context);
                             }
@@ -320,6 +321,8 @@ fun registerPatient(patientDetails: PatientDetails, context: Context) {
                 Toast.makeText(context, "You Registered Successfully", Toast.LENGTH_SHORT)
                     .show()
 
+                context.startActivity(Intent(context, LoginActivity::class.java))
+                (context as Activity).finish()
             } else {
                 Toast.makeText(
                     context,
@@ -341,5 +344,7 @@ data class PatientDetails(
     var name: String = "",
     var emailid: String = "",
     var age: String = "",
-    var password: String = ""
+    var password: String = "",
+    var role:String = "",
+    var id:String=""
 )

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import jeevanreddy.app.doctorconsultationapp.doctor.DoctorHomeActivity
 import jeevanreddy.app.doctorconsultationapp.ui.theme.DoctorConsultationAppTheme
 import kotlinx.coroutines.delay
 
@@ -39,7 +39,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        enableEdgeToEdge()
         setContent {
             DoctorConsultationAppTheme {
                 EntryScreenMA()
@@ -52,26 +51,48 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun EntryScreenMA() {
     val context = LocalContext.current as Activity
+    var splashValue by remember { mutableStateOf(true) }
+
 
     LaunchedEffect(Unit) {
         delay(3000)
+        splashValue=false
 
-        gotoLogin(context)
-
-//        val patientLS = if (PatientDetails.getPatientLoginStatus(context)) 2 else 1
-//
-//        if (patientLS == 1) {
-//            Navigation.goAccessActivity(context, true)
-//        }
     }
 
-    EntryScreen()
+    if (splashValue) {
+        EntryScreen()
+    } else {
+
+        if (UserPrefs.checkLoginStatus(context = context)) {
+            val role = UserPrefs.getRole(context)
+
+            if (role == "doctor") {
+                gotoDoctorHome(context)
+            } else {
+                gotoPatientHome(context)
+            }
+        } else {
+            gotoLogin(context)
+        }
+    }
 }
 
 fun gotoLogin(context: Activity) {
     context.startActivity(Intent(context, LoginActivity::class.java))
     context.finish()
 }
+
+fun gotoDoctorHome(context: Activity) {
+    context.startActivity(Intent(context, DoctorHomeActivity::class.java))
+    context.finish()
+}
+
+fun gotoPatientHome(context: Activity) {
+    context.startActivity(Intent(context, HomeActivity::class.java))
+    context.finish()
+}
+
 
 @Composable
 fun EntryScreen() {
