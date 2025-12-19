@@ -6,8 +6,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,6 +23,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -31,6 +34,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -47,6 +51,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -247,57 +252,138 @@ fun FilterChipItem(text: String, isSelected: Boolean, onSelect: () -> Unit) {
 // ===========================================================
 // 👨‍⚕️ DOCTOR PROFILE DIALOG
 // ===========================================================
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DoctorProfileDialog(doctor: Doctor, onClose: () -> Unit) {
-
+fun DoctorProfileDialog(
+    doctor: Doctor,
+    onClose: () -> Unit
+) {
     AlertDialog(
         onDismissRequest = onClose,
+        shape = RoundedCornerShape(20.dp),
+        containerColor = Color.White,
         title = {
-            Text(doctor.name, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Text(
+                text = "Doctor Profile",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
         },
         text = {
-
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                Image(
-                    painter = rememberAsyncImagePainter(doctor.imageUrl),
-                    contentDescription = null,
+                // ===== Doctor Image =====
+                Box(
                     modifier = Modifier
                         .size(120.dp)
-                        .clip(RoundedCornerShape(60.dp))
+                        .clip(CircleShape)
+                        .border(
+                            width = 2.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = CircleShape
+                        )
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(doctor.imageUrl),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                // ===== Name =====
+                Text(
+                    text = doctor.name,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Text(
+                    text = doctor.specialization,
+                    fontSize = 14.sp,
+                    color = Color.Gray
                 )
 
                 Spacer(Modifier.height(12.dp))
 
-                Text("Specialization: ${doctor.specialization}")
-                Text("Experience: ${doctor.experience} years")
+                // ===== Info Card =====
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA))
+                ) {
+                    Column(modifier = Modifier.padding(14.dp)) {
 
-                Spacer(Modifier.height(6.dp))
+                        InfoRow("Experience", "${doctor.experience} years")
+                        InfoRow(
+                            "Available Days",
+                            doctor.availableDays.joinToString()
+                        )
+                        InfoRow(
+                            "Time Slots",
+                            doctor.availableSlots.joinToString()
+                        )
+                    }
+                }
 
-                Text("About:", fontWeight = FontWeight.Bold)
-                Text(doctor.about, fontSize = 14.sp)
+                Spacer(Modifier.height(12.dp))
 
-                Spacer(Modifier.height(10.dp))
+                // ===== About Section =====
+                Text(
+                    text = "About Doctor",
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.align(Alignment.Start)
+                )
 
-                Text("Available Days: ${doctor.availableDays.joinToString()}")
-                Text("Slots: ${doctor.availableSlots.joinToString()}")
+                Spacer(Modifier.height(4.dp))
+
+                Text(
+                    text = doctor.about,
+                    fontSize = 14.sp,
+                    color = Color.DarkGray
+                )
             }
         },
         confirmButton = {
             TextButton(onClick = onClose) {
-                Text("Close")
+                Text(
+                    "Close",
+                    fontWeight = FontWeight.SemiBold
+                )
             }
         }
     )
 }
 
+@Composable
+fun InfoRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = label,
+            fontSize = 13.sp,
+            color = Color.Gray
+        )
+        Text(
+            text = value,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
 
-// ===========================================================
-// 📌 DOCTOR MODEL
-// ===========================================================
+
 data class Doctor(
     val id: String = "",
     val name: String = "",
@@ -307,8 +393,13 @@ data class Doctor(
     val imageUrl: String = "",
     val location: String = "",
     val availableDays: List<String> = emptyList(),
-    val availableSlots: List<String> = emptyList()
+    val availableSlots: List<String> = emptyList(),
+
+    // 🔽 NEW (REQUIRED)
+    val advanceBookingDays: Int = 7,
+    val leaves: Map<String, Boolean> = emptyMap()
 )
+
 
 
 

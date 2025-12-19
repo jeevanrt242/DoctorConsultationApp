@@ -2,14 +2,18 @@ package jeevanreddy.app.doctorconsultationapp.patient
 
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.DatePicker
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,17 +24,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -50,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -90,8 +98,6 @@ class BookAppointmentActivity : ComponentActivity() {
         }
     }
 }
-
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -153,39 +159,14 @@ fun BookAppointmentScreen(
             // Doctor list
             items(doctors) { doctor ->
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable {
-                            selectedDoctor = doctor
-                            showDateDialog = true // Show date dialog immediately
-                        },
-                    shape = RoundedCornerShape(18.dp),
-                    elevation = CardDefaults.cardElevation(10.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        Image(
-                            painter = rememberAsyncImagePainter(doctor.imageUrl),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(70.dp)
-                                .clip(RoundedCornerShape(50))
-                        )
-
-                        Spacer(Modifier.width(12.dp))
-
-                        Column {
-                            Text(doctor.name, fontWeight = FontWeight.Bold, fontSize = 17.sp)
-                            Text(doctor.specialization, color = Color.Gray)
-                            Text("${doctor.experience} years experience", color = Color.DarkGray)
-                        }
+                DoctorCard(
+                    doctor = doctor,
+                    onSelect = {
+                        selectedDoctor = doctor
+                        showDateDialog = true
                     }
-                }
+                )
+
             }
         }
 
@@ -195,18 +176,51 @@ fun BookAppointmentScreen(
         if (showDateDialog) {
             AlertDialog(
                 onDismissRequest = { showDateDialog = false },
-                title = { Text("Select Appointment Date", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(
+                        "Select Appointment Date",
+                        fontWeight = FontWeight.Bold
+                    )
+                },
                 text = {
+
                     val calendar = Calendar.getInstance()
+                    val maxCalendar = Calendar.getInstance().apply {
+                        add(Calendar.DAY_OF_MONTH, selectedDoctor!!.advanceBookingDays)
+                    }
+
                     AndroidView(
                         factory = { context ->
                             DatePicker(context).apply {
+
+                                // ✅ Today onwards
+                                minDate = calendar.timeInMillis
+
+                                // ✅ Advance booking limit
+                                maxDate = maxCalendar.timeInMillis
+
+                                Log.e("Test","$selectedDoctor - ABD : ${selectedDoctor!!.advanceBookingDays}")
+
                                 init(
                                     calendar.get(Calendar.YEAR),
                                     calendar.get(Calendar.MONTH),
                                     calendar.get(Calendar.DAY_OF_MONTH)
                                 ) { _, y, m, d ->
-                                    selectedDate = "$d/${m + 1}/$y"
+
+                                    val pickedDate = formatDate(y, m, d)
+
+                                    // 🚫 Leave date check
+                                    if (selectedDoctor!!.leaves.containsKey(pickedDate)) {
+                                        Toast.makeText(
+                                            context,
+                                            "Doctor is on leave on this date",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+
+                                        selectedDate = ""
+                                    } else {
+                                        selectedDate = pickedDate
+                                    }
                                 }
                             }
                         }
@@ -215,17 +229,28 @@ fun BookAppointmentScreen(
                 confirmButton = {
                     TextButton(
                         onClick = {
-                            if (selectedDate.isNotEmpty()) {
+                            if (selectedDate.isEmpty()) {
+                                Toast.makeText(
+                                    context,
+                                    "Please select a valid date",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            } else {
                                 showDateDialog = false
                                 showPatientDialog = true
                             }
                         }
-                    ) { Text("Next") }
+                    ) {
+                        Text("Next")
+                    }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showDateDialog = false }) { Text("Cancel") }
+                    TextButton(onClick = { showDateDialog = false }) {
+                        Text("Cancel")
+                    }
                 }
             )
+
         }
 
         // ---------------------------
@@ -279,7 +304,8 @@ fun BookAppointmentScreen(
                         onClick = {
                             val tokenId = UUID.randomUUID().toString()
                             val userEmailRaw = UserPrefs.getEmail(context)
-                            val userEmail = userEmailRaw.replace(".", ",") // sanitize for Firebase keys
+                            val userEmail =
+                                userEmailRaw.replace(".", ",") // sanitize for Firebase keys
 
                             // create a push key under the user's node
                             val ref = FirebaseDatabase.getInstance()
@@ -322,6 +348,88 @@ fun BookAppointmentScreen(
                     TextButton(onClick = { showPatientDialog = false }) { Text("Cancel") }
                 }
             )
+        }
+    }
+}
+
+fun formatDate(y: Int, m: Int, d: Int): String {
+    return String.format("%04d-%02d-%02d", y, m + 1, d)
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DoctorCard(
+    doctor: Doctor,
+    onSelect: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            // ===== Doctor Image =====
+            Image(
+                painter = rememberAsyncImagePainter(doctor.imageUrl),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(72.dp)
+                    .clip(CircleShape)
+                    .border(
+                        width = 1.5.dp,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                        shape = CircleShape
+                    ),
+                contentScale = ContentScale.Crop
+            )
+
+            Spacer(Modifier.width(14.dp))
+
+            // ===== Doctor Info =====
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = doctor.name,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Text(
+                    text = doctor.specialization,
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+
+                Text(
+                    text = "${doctor.experience} yrs experience",
+                    fontSize = 13.sp,
+                    color = Color.DarkGray
+                )
+            }
+
+            // ===== Select Button =====
+            Button(
+                onClick = onSelect,
+                shape = RoundedCornerShape(14.dp),
+                contentPadding = PaddingValues(horizontal = 18.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = "Select",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }

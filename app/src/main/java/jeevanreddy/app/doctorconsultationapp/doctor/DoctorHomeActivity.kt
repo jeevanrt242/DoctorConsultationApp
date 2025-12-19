@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.DatePicker
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -57,7 +59,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.database.DataSnapshot
@@ -65,6 +69,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import jeevanreddy.app.doctorconsultationapp.R
 import jeevanreddy.app.doctorconsultationapp.UserPrefs
 import jeevanreddy.app.doctorconsultationapp.patient.PatientProfileActivity
 import jeevanreddy.app.doctorconsultationapp.ui.theme.P1
@@ -166,6 +171,111 @@ fun DoctorHomeScreen(
                 .padding(16.dp)
                 .fillMaxSize()
         ) {
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        context.startActivity(
+                            Intent(
+                                context,
+                                ManageAvailabilityActivity::class.java
+                            )
+                        )
+                    }
+                    .background(
+                        color = Color(0xFFEFEFEF),   // your background color
+                        shape = RoundedCornerShape(12.dp) // optional rounded corners
+                    )
+                    .padding(16.dp) // inner padding so content doesn't touch edges
+            )
+            {
+
+                Image(
+                    painter = painterResource(id = R.drawable.ic_manage_appointment),
+                    contentDescription = "Doctor App",
+                    modifier = Modifier
+                        .size(62.dp)
+                )
+
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Text(
+                    text = "Manage Availability",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+
+                Icon(
+                    imageVector = Icons.Default.ArrowForwardIos,
+                    contentDescription = "Arrow",
+                    tint = Color.Black
+                )
+
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        color = Color(0xFFEFEFEF),   // your background color
+                        shape = RoundedCornerShape(12.dp) // optional rounded corners
+                    )
+                    .clickable {
+                        context.startActivity(
+                            Intent(
+                                context,
+                                PatientProfileActivity::class.java
+                            )
+                        )
+                    }
+                    .padding(16.dp) // inner padding so content doesn't touch edges
+
+            )
+            {
+
+                Image(
+                    painter = painterResource(id = R.drawable.profile),
+                    contentDescription = "Doctor App",
+                    modifier = Modifier
+                        .size(62.dp)
+                )
+
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "My Profile",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+
+                )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+
+                Icon(
+                    imageVector = Icons.Default.ArrowForwardIos,
+                    contentDescription = "Arrow",
+                    tint = Color.Black
+                )
+
+
+            }
+
 
             // DATE SELECTOR
             Text("Select Date", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
@@ -351,7 +461,11 @@ fun AppointmentCardForDoctor(appt: Appointment, snackBar: SnackbarHostState) {
                         .padding(12.dp)
                 ) {
                     Column {
-                        Text("Prescription", fontWeight = FontWeight.Bold, color = Color(0xFF0D47A1))
+                        Text(
+                            "Prescription",
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0D47A1)
+                        )
                         Spacer(Modifier.height(4.dp))
                         Text(appt.prescription!!, color = Color(0xFF1A237E))
                     }
@@ -442,7 +556,6 @@ fun AppointmentCardForDoctor(appt: Appointment, snackBar: SnackbarHostState) {
         )
     }
 }
-
 
 
 // -----------------------------------------------------------

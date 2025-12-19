@@ -7,11 +7,10 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -23,14 +22,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -52,11 +47,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.database.FirebaseDatabase
 import jeevanreddy.app.doctorconsultationapp.doctor.DoctorHomeActivity
-import kotlin.jvm.java
 
 
 class LoginActivity : ComponentActivity() {
@@ -73,6 +65,9 @@ class LoginActivity : ComponentActivity() {
 fun AccessActivityScreen() {
     var patientEmail by remember { mutableStateOf("") }
     var patientPassword by remember { mutableStateOf("") }
+
+    var selectedRole by remember { mutableStateOf("Patient") }
+
 
     val context = LocalContext.current as Activity
 
@@ -135,6 +130,14 @@ fun AccessActivityScreen() {
                     ),
                 colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.SoftBlue))
             ) {
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                RoleSelector(
+                    selectedRole = selectedRole,
+                    onRoleChange = { selectedRole = it }
+                )
+
                 Spacer(modifier = Modifier.height(32.dp))
 
                 Text(
@@ -183,23 +186,28 @@ fun AccessActivityScreen() {
                     onClick = {
                         when {
                             patientEmail.isEmpty() -> {
-                                Toast.makeText(context, " Please Enter Mail", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, " Please Enter Mail", Toast.LENGTH_SHORT)
+                                    .show()
                             }
 
                             patientPassword.isEmpty() -> {
-                                Toast.makeText(context, " Please Enter Password", Toast.LENGTH_SHORT)
+                                Toast.makeText(
+                                    context,
+                                    " Please Enter Password",
+                                    Toast.LENGTH_SHORT
+                                )
                                     .show()
                             }
 
                             else -> {
-                                val facultyDetails = PatientDetails(
+                                val patientDetails = PatientDetails(
                                     "",
                                     patientEmail,
                                     "",
                                     patientPassword
                                 )
 
-                                loginUser(facultyDetails,context)
+                                loginUser(patientDetails,selectedRole, context)
                             }
 
                         }
@@ -223,30 +231,79 @@ fun AccessActivityScreen() {
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Row(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                ) {
-                    Text(text = "I'm new to this app !", fontSize = 14.sp)
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "Register",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = colorResource(id = R.color.white), // Blue text color for "Sign Up"
-                        modifier = Modifier.clickable {
-                            context.startActivity(
-                                Intent(
-                                    context,
-                                    DoctorRegistrationActivity::class.java
+                if (selectedRole == "Patient") {
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    ) {
+                        Text(text = "I'm new to this app !", fontSize = 14.sp)
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "Register",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = colorResource(id = R.color.white), // Blue text color for "Sign Up"
+                            modifier = Modifier.clickable {
+                                context.startActivity(
+                                    Intent(
+                                        context,
+                                        DoctorRegistrationActivity::class.java
+                                    )
                                 )
-                            )
-                            context.finish()
-                        }
+                                context.finish()
+                            }
+                        )
+                    }
+
+                }
+                Spacer(modifier = Modifier.height(36.dp))
+
+            }
+        }
+    }
+}
+
+@Composable
+fun RoleSelector(
+    selectedRole: String,
+    onRoleChange: (String) -> Unit
+) {
+    val roles = listOf("Patient", "Doctor")
+
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(6.dp),
+        modifier = Modifier
+            .padding(horizontal = 24.dp)
+            .fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .background(Color.White)
+                .padding(6.dp)
+        ) {
+            roles.forEach { role ->
+                val isSelected = role == selectedRole
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(
+                            if (isSelected)
+                                colorResource(id = R.color.SlateBlue)
+                            else
+                                Color.Transparent
+                        )
+                        .clickable { onRoleChange(role) }
+                        .padding(vertical = 10.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = role,
+                        fontWeight = FontWeight.Bold,
+                        color = if (isSelected) Color.White else Color.Gray
                     )
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
             }
         }
     }
@@ -259,10 +316,11 @@ fun AccessActivityPreview() {
     AccessActivityScreen()
 }
 
-fun loginUser(patientDetails: PatientDetails, context: Context) {
+fun loginUser(patientDetails: PatientDetails,selectedRole: String, context: Context) {
 
     val firebaseDatabase = FirebaseDatabase.getInstance()
-    val databaseReference = firebaseDatabase.getReference("PatientDetails").child(patientDetails.emailid.replace(".", ","))
+    val databaseReference = firebaseDatabase.getReference("PatientDetails")
+        .child(patientDetails.emailid.replace(".", ","))
 
     databaseReference.get().addOnCompleteListener { task ->
         if (task.isSuccessful) {
@@ -270,28 +328,40 @@ fun loginUser(patientDetails: PatientDetails, context: Context) {
             if (userData != null) {
                 if (userData.password == patientDetails.password) {
 
-                    UserPrefs.markLoginStatus(context = context, true)
-                    UserPrefs.saveEmail(context, email =patientDetails.emailid )
-                    UserPrefs.saveName(context, patientDetails.name)
-                    UserPrefs.saveRole(context, userData.role)
 
-                    Toast.makeText(context, "Login Successfully", Toast.LENGTH_SHORT).show()
-
-                    if(userData.role=="doctor")
+                    if (selectedRole == "Patient" && userData.role == "patient")
                     {
+                        Toast.makeText(context, "Patient Login Successfully", Toast.LENGTH_SHORT).show()
+                    }else if(selectedRole == "Doctor" && userData.role == "doctor"){
+                        Toast.makeText(context, "Doctor Login Successfully", Toast.LENGTH_SHORT).show()
+                    }else{
+                        Toast.makeText(context, "No $selectedRole account found", Toast.LENGTH_SHORT).show()
+                        return@addOnCompleteListener
+                    }
+
+
+                    UserPrefs.markLoginStatus(context = context, true)
+                    UserPrefs.saveEmail(context, email = userData.emailid)
+                    UserPrefs.saveName(context, userData.name)
+                    UserPrefs.saveRole(context, userData.role)
+                    UserPrefs.saveAge(context, userData.age)
+
+//                    Toast.makeText(context, "Login Successfully", Toast.LENGTH_SHORT).show()
+
+                    if (userData.role == "doctor") {
                         UserPrefs.saveID(context, userData.id)
                         context.startActivity(Intent(context, DoctorHomeActivity::class.java))
                         (context as Activity).finish()
 
-                    }else{
+                    } else {
                         context.startActivity(Intent(context, HomeActivity::class.java))
                         (context as Activity).finish()
                     }
 
 
-
                 } else {
-                    Toast.makeText(context, "Seems Incorrect Credentials", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Seems Incorrect Credentials", Toast.LENGTH_SHORT)
+                        .show()
                 }
             } else {
                 Toast.makeText(context, "Your account not found", Toast.LENGTH_SHORT).show()

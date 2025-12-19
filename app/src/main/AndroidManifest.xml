@@ -12,11 +12,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.DoctorConsultationApp"
         tools:targetApi="31">
-
+        <activity
+            android:name=".doctor.ManageAvailabilityActivity"
+            android:exported="false" />
         <activity
             android:name=".doctor.DoctorHomeActivity"
             android:exported="false" />
-
         <activity
             android:name=".patient.PatientProfileActivity"
             android:exported="false" />
@@ -26,19 +27,15 @@
         <activity
             android:name=".DoctorRegistrationActivity"
             android:exported="false" />
-
         <activity
             android:name=".doctor.UpcomingAppointmentActivity"
             android:exported="false" />
-
         <activity
             android:name=".patient.PastAppointmentActivity"
             android:exported="false" />
-
         <activity
             android:name=".patient.SearchDoctorActivity"
             android:exported="false" />
-
         <activity
             android:name=".patient.BookAppointmentActivity"
             android:exported="false" />
