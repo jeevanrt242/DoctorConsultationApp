@@ -28,7 +28,7 @@
             android:name=".DoctorRegistrationActivity"
             android:exported="false" />
         <activity
-            android:name=".doctor.UpcomingAppointmentActivity"
+            android:name=".patient.UpcomingAppointmentActivity"
             android:exported="false" />
         <activity
             android:name=".patient.PastAppointmentActivity"

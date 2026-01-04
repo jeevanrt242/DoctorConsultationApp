@@ -1,15 +1,16 @@
 {
   "project_info": {
     "project_number": "738263095180",
+    "firebase_url": "https://doctorconsultationapp-eebd5-default-rtdb.firebaseio.com",
     "project_id": "doctorconsultationapp-eebd5",
     "storage_bucket": "doctorconsultationapp-eebd5.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:738263095180:android:37c79d4b28f7f10b9e68a9",
+        "mobilesdk_app_id": "1:738263095180:android:cd4b36c89c8478099e68a9",
         "android_client_info": {
-          "package_name": "jeevanreddy.app.doctorconsultationapp"
+          "package_name": "jeevanreddys3340278.app.doctorconsultationproject"
         }
       },
       "oauth_client": [],
